@@ -24,14 +24,20 @@ jobs:
           if [ ! -x mklittlefs/mklittlefs ]; then
             make -C mklittlefs -j"$(nproc)"
           fi
+      - name: Check display build selection
+        run: python3 -m unittest discover -s tests -v
       - name: Build
-        run: make s3-lcd
+        run: |
+          make s3-lcd
+          make s3-tdongle
+          make s3
       - name: Rename output
         run: |
           mkdir -p dist
           tag="${GITHUB_REF_NAME}"
           [ "${GITHUB_REF_TYPE}" = "tag" ] || tag="dev-${GITHUB_SHA::7}"
           cp build/lcd/s3/esp32-arduino.s3.merged.bin "dist/esp32-arduino.s3.merged-lcd-${tag}.bin"
+          cp build/tdongle-s3/s3/esp32-arduino.tdongle-s3.merged.bin "dist/esp32-arduino.tdongle-s3.merged-${tag}.bin"
       - uses: actions/upload-artifact@v4
         with:
           name: s3-lcd-firmware

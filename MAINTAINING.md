@@ -21,7 +21,9 @@ Once resolved:
 ```sh
 git add <resolved files>
 git commit -m "Merge upstream <version>, keep LCD display"
-make s3-lcd   # confirm it still builds before pushing
+make s3-lcd   # confirm the existing display build still works
+make s3-tdongle
+make s3
 git push
 ```
 
@@ -41,9 +43,11 @@ git push origin v0.6.1-0_display
 ```
 
 Pushing a `v*` tag triggers `.github/workflows/build-lcd.yml`, which
-builds the firmware, renames the output to
-`esp32-arduino.s3.merged-lcd-<tag>.bin`, and attaches it to an
-auto-created GitHub Release for that tag.
+checks the display build selection, builds both display variants and plain S3,
+and attaches these two display images to an auto-created GitHub Release:
+
+- `esp32-arduino.s3.merged-lcd-<tag>.bin` — Pocket-Dongle-S3 (existing filename)
+- `esp32-arduino.tdongle-s3.merged-<tag>.bin` — LILYGO T-Dongle-S3
 
 ## Local build (WSL/Ubuntu)
 
@@ -53,6 +57,14 @@ chmod +x *.sh prepare-data.sh
 git submodule update --init --recursive
 ./install-deps.sh
 make s3-lcd
+make s3-tdongle
 ```
 
 Output: `build/lcd/s3/esp32-arduino.s3.merged.bin`
+
+T-Dongle-S3 output: `build/tdongle-s3/s3/esp32-arduino.tdongle-s3.merged.bin`
+
+Run `python3 -m unittest discover -s tests -v` to check that both display
+targets select distinct build directories and the correct board variant.
+The initial T-Dongle-S3 build was flashed and visually checked on hardware.
+Repeat the screen check when changing display initialization or layout.

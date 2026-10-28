@@ -10,7 +10,7 @@ Fork of [owendswang/ps5-webkit-autoloader-esp32](https://github.com/owendswang/p
 which is itself based on [itsPLK/ps5-webkit-autoloader](https://github.com/itsPLK/ps5-webkit-autoloader).
 
 ## Changes in this fork
-- Added display support: <describe>
+- Added display support for Pocket-Dongle-S3 and LILYGO T-Dongle-S3 (0.96-inch ST7735, 160×80).
 - Wifi Hotspot, Ip address, Password, firmware version & Clients connected.
 - Added flashing isntructions and wifi name change in the readme.
 - Link to the ESP32 S3 dongle used:
@@ -35,6 +35,15 @@ The web content in `autoloader/` is based on a modified version of the [`ps5-web
 You could choose to use poops or relapse if your FW supports both methods while caching. It would use Poops by default if you don't choose.
 
 ## Flashing your ESP32 S3 Dongle
+
+Choose the BIN for your board: `esp32-arduino.s3.merged-lcd-<tag>.bin`
+for Pocket-Dongle-S3, or `esp32-arduino.tdongle-s3.merged-<tag>.bin`
+for LILYGO T-Dongle-S3. Their display pins differ; the BINs are not interchangeable.
+
+For LILYGO T-Dongle-S3, hold **BOOT** while plugging it into the PC, then release
+it to enter download mode. Flash the merged BIN at address **0x0** using the
+web flasher below. Unplug and reconnect without holding BOOT to run it.
+The normal firmware disconnects USB data after boot; this is expected.
 
 1. HOLD the Reset button, plug the dongle to pc, wait for 1 second then release button. If PC says USB not recognised, then button was not pressed.
 2. Open https://adafruit.github.io/Adafruit_WebSerial_ESPTool/
@@ -75,6 +84,32 @@ Install the Arduino CLI and required core:
 ```
 
 ## Build
+
+Display variants:
+
+```sh
+make s3-lcd       # Existing Pocket-Dongle-S3
+make s3-tdongle   # LILYGO T-Dongle-S3
+```
+
+Outputs:
+
+- Pocket-Dongle-S3: `build/lcd/s3/esp32-arduino.s3.merged.bin`
+- LILYGO T-Dongle-S3: `build/tdongle-s3/s3/esp32-arduino.tdongle-s3.merged.bin`
+
+Both use the existing 4 MB partition layout and do not require PSRAM. The
+T-Dongle-S3's remaining flash is unused. The shared display shows IP, Wi-Fi name,
+password, firmware version, and client count. T-Dongle-S3 uses MOSI 3, SCLK 5,
+CS 4, DC 2, reset 1, and an active-low backlight on GPIO38, matching
+[LILYGO's reference](https://github.com/Xinyuan-LilyGO/T-Dongle-S3/blob/main/examples/factory_screen/factory_screen.ino).
+
+Check the display build selection with `python3 -m unittest discover -s tests -v`.
+The T-Dongle-S3 firmware has been flashed and its screen visually checked on hardware.
+After flashing, verify the full text fits, the header is blue, the background is
+black, and the client count updates when a device connects. End-to-end PS5
+operation and live client-count updates have not yet been confirmed on T-Dongle-S3.
+
+The existing non-display build remains:
 
 ```sh
 make

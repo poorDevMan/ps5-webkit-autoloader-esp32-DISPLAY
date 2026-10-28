@@ -65,6 +65,9 @@ USB_DEBUG_FLAG := -DUSB_DEBUG=$(USB_DEBUG)
 LCD ?= 0
 ifeq ($(LCD),1)
 LCD_FLAG := -DLCD_DONGLE
+ifeq ($(LCD_TDONGLE),1)
+LCD_FLAG += -DLCD_TDONGLE
+endif
 ifeq ($(LCD_TEST),1)
 LCD_FLAG += -DLCD_TEST
 endif
@@ -117,7 +120,7 @@ ESP8266_FLASH_SIZE := 4194304
 ESP8266_LITTLEFS_SIZE := 0x2FA000
 ESP8266_LITTLEFS_OFFSET := 0x100000
 
-.PHONY: all debug debug-s2 s3-lcd pico pico-8m s2 s3 c3 8266 littlefs datadir minimize check check-minimize check-data check-littlefs check-8266 clean FORCE
+.PHONY: all debug debug-s2 s3-lcd s3-tdongle pico pico-8m s2 s3 c3 8266 littlefs datadir minimize check check-minimize check-data check-littlefs check-8266 clean FORCE
 
 all: check $(PICO_MERGED) $(S2_MERGED) $(S3_MERGED) $(C3_MERGED)
 	@echo
@@ -132,6 +135,10 @@ debug-s2:
 
 s3-lcd:
 	@$(MAKE) LCD=1 BUILD_DIR="$(PROJECT_DIR)/build/lcd" s3
+
+s3-tdongle:
+	@$(MAKE) LCD=1 LCD_TDONGLE=1 BUILD_DIR="$(PROJECT_DIR)/build/tdongle-s3" \
+	    S3_MERGED="$(PROJECT_DIR)/build/tdongle-s3/s3/$(PROJECT_NAME).tdongle-s3.merged.bin" s3
 
 pico: check $(PICO_MERGED)
 	@ls -lh "$(PICO_MERGED)"

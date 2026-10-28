@@ -11,16 +11,26 @@
 #include "server_certs.h"
 
 #ifdef LCD_DONGLE
-// Pocket-Dongle-S3 0.96" ST7735 80x160 LCD (software SPI).
+// Pocket-Dongle-S3 and LILYGO T-Dongle-S3 0.96" ST7735 80x160 LCD (software SPI).
 #include <Adafruit_GFX.h>
 #include <Adafruit_ST7735.h>
 
+#ifdef LCD_TDONGLE
+// LILYGO T-Dongle-S3: GPIO38 drives the active-low backlight.
+#define LCD_MOSI 3
+#define LCD_SCLK 5
+#define LCD_CS   4
+#define LCD_DC   2
+#define LCD_RST  1
+#define LCD_BL   38
+#else
 // Pocket-Dongle-S3 (AliExpress) pins. Backlight is always on (no control pin).
 #define LCD_MOSI 11
 #define LCD_SCLK 10
 #define LCD_CS   12
 #define LCD_DC   13
 #define LCD_RST  14
+#endif
 #ifndef LCD_INIT_VARIANT
 #define LCD_INIT_VARIANT INITR_MINI160x80_PLUGIN   // fallback: INITR_MINI160x80
 #endif
@@ -57,8 +67,16 @@ static LcdPanel lcd(LCD_CS, LCD_DC, LCD_MOSI, LCD_SCLK, LCD_RST);
 
 static void lcdInit()
 {
+#ifdef LCD_TDONGLE
+    pinMode(LCD_BL, OUTPUT);
+    digitalWrite(LCD_BL, HIGH);  // Keep the backlight off until panel RAM is cleared.
+#endif
     lcd.initR(LCD_INIT_VARIANT);
     lcd.setRotation(1);   // 160x80 landscape
+#ifdef LCD_TDONGLE
+    lcd.clearRam();
+    digitalWrite(LCD_BL, LOW);
+#endif
 #ifdef LCD_TEST
     // Offset scan: find the label whose white border is complete on all 4 edges
     // with no junk rows/columns. Report that X/Y pair.
