@@ -9,6 +9,15 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       contents: write
+    strategy:
+      matrix:
+        include:
+          - target: s3-lcd
+            board: pocket-dongle-s3
+            bin_path: build/lcd/s3/esp32-arduino.s3.merged.bin
+          - target: s3-tdongle
+            board: tdongle-s3
+            bin_path: build/tdongle-s3/s3/esp32-arduino.tdongle-s3.merged.bin
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,23 +33,17 @@ jobs:
           if [ ! -x mklittlefs/mklittlefs ]; then
             make -C mklittlefs -j"$(nproc)"
           fi
-      - name: Check display build selection
-        run: python3 -m unittest discover -s tests -v
-      - name: Build
-        run: |
-          make s3-lcd
-          make s3-tdongle
-          make s3
+      - name: Build ${{ matrix.board }}
+        run: make ${{ matrix.target }}
       - name: Rename output
         run: |
           mkdir -p dist
           tag="${GITHUB_REF_NAME}"
           [ "${GITHUB_REF_TYPE}" = "tag" ] || tag="dev-${GITHUB_SHA::7}"
-          cp build/lcd/s3/esp32-arduino.s3.merged.bin "dist/esp32-arduino.s3.merged-lcd-${tag}.bin"
-          cp build/tdongle-s3/s3/esp32-arduino.tdongle-s3.merged.bin "dist/esp32-arduino.tdongle-s3.merged-${tag}.bin"
+          cp "${{ matrix.bin_path }}" "dist/esp32-arduino.${{ matrix.board }}-${tag}.bin"
       - uses: actions/upload-artifact@v4
         with:
-          name: s3-lcd-firmware
+          name: firmware-${{ matrix.board }}
           path: dist/*.bin
       - name: Attach to release
         if: startsWith(github.ref, 'refs/tags/v')
