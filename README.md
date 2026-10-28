@@ -30,7 +30,7 @@ The web content in `autoloader/` is based on a modified version of the [`ps5-web
 ## Firmware Version Supports
 
 - poops        7.00 - 12.00
-- relapse        7.00 - 13.60   (except 9.05 and 11.40)
+- relapse      7.00 - 13.60 (except 9.05 and 11.40)
 
 You could choose to use poops or relapse if your FW supports both methods while caching. It would use Poops by default if you don't choose.
 
