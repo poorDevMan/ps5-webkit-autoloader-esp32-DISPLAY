@@ -36,7 +36,7 @@
 #endif
 
 #ifndef APP_VERSION
-#define APP_VERSION "0.6.2-0"
+#define APP_VERSION "0.7.1-0"
 #endif
 
 #ifndef LCD_X_OFF
